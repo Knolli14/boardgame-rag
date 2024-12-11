@@ -10,6 +10,12 @@ def save_pdf(content, title):
     if not os.path.exists(filepath):
         with open(filepath, "wb") as output:
             output.write(content)
+            print(title, "has been saved.")
+
+    else:
+        print(title, "already exists.")
+
+    return None
 
 
 def load_json(filepath):
@@ -17,6 +23,7 @@ def load_json(filepath):
     if os.path.exists(filepath):
         with open(filepath) as file:
             return json.load(file)
+
     else:
         print("No such file!")
         return None

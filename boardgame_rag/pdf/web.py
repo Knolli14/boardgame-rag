@@ -1,17 +1,15 @@
 import requests
-import json
 
 from bs4 import BeautifulSoup
 
-from boardgame_rag.params import LOCAL_DATA_PATH
-from boardgame_rag.data import save_pdf
-
+from boardgame_rag.data import save_pdf, load_json, save_to_json
+from boardgame_rag.params import MAX_SEARCH_PAGE
 
 class PDFExtractor:
     ''' Class handling Extraction from web '''
 
     URL = "https://en.1jour-1jeu.com/rules/search?page="
-    MAX_SEARCH_PAGE = 395
+    MAX_SEARCH_PAGE = MAX_SEARCH_PAGE
 
     def __init__(self, games_list=None):
         self.games_list = games_list if games_list else []
@@ -45,7 +43,7 @@ class PDFExtractor:
             return tag_results
 
         # loop over all pages
-        for page in range (MAX_SEARCH_PAGE+1):
+        for page in range (self.MAX_SEARCH_PAGE+1):
             print("Extracting URLs and titles from page:", page)
 
             # extract tags
@@ -74,8 +72,7 @@ class PDFExtractor:
         ''' saves extracted urls and title locally as json'''
 
         if self.games_list:
-            with open("games_list.json", "w") as output:
-                output.write(json.dumps(self.games_list))
+            save_to_json("games_list.json", self.games_list)
             print("Successfully saved to './games_list.json'")
 
         else:
@@ -92,27 +89,19 @@ class PDFExtractor:
             save_pdf(content, title)
             print(title, "has been saved.")
 
+        return None
+
 
     # Class Methods
 
     @classmethod
     def from_json(cls):
 
-        if os.path.exists("games_list.json"):
-            with open("games_list.json") as file:
-                games_list = json.load(file)
+        games_list = load_json("games_list.json")
+        print("Successfully loaded 'games_list.json' into PDFExtractor")
 
-            print("Successfully loaded 'games_list.json' into PDFHandler")
-            return cls(games_list=games_list)
+        return cls(games_list=games_list)
 
-        else:
-            print("No such file!")
 
 if __name__ == "__main__":
-
-    #handler = PDFHandler()
-    #handler.extract_games_list()
-    #handler.save_games_list()
-
-    handler = PDFHandler.from_json()
-    handler.download_pdfs()
+    pass

@@ -3,13 +3,12 @@ import requests
 from bs4 import BeautifulSoup
 
 from boardgame_rag.data import save_pdf, load_json, save_to_json
-from boardgame_rag.params import MAX_SEARCH_PAGE
 
 class PDFExtractor:
     ''' Class handling Extraction from web '''
 
     URL = "https://en.1jour-1jeu.com/rules/search?page="
-    MAX_SEARCH_PAGE = MAX_SEARCH_PAGE
+    MAX_SEARCH_PAGE = 1
 
     def __init__(self, games_list=None):
         self.games_list = games_list if games_list else []
@@ -43,7 +42,7 @@ class PDFExtractor:
             return tag_results
 
         # loop over all pages
-        for page in range (self.MAX_SEARCH_PAGE+1):
+        for page in range (1, self.MAX_SEARCH_PAGE+1): #page 0 and 1 are the same
             print("Extracting URLs and titles from page:", page)
 
             # extract tags
@@ -67,6 +66,8 @@ class PDFExtractor:
               str(len(self.games_list)) + "games have been added in total",
               sep="\n")
 
+        return self
+
 
     def save_games_list(self):
         ''' saves extracted urls and title locally as json'''
@@ -78,6 +79,8 @@ class PDFExtractor:
         else:
             print("No games_list extrcted yet!")
 
+        return None
+
 
     def download_pdfs(self):
         ''' downloads the games saved in the games_list'''
@@ -87,7 +90,7 @@ class PDFExtractor:
             title = game["title"]
             content = requests.get(game["url"]).content
             save_pdf(content, title)
-            print(title, "has been saved.")
+
 
         return None
 
@@ -104,4 +107,9 @@ class PDFExtractor:
 
 
 if __name__ == "__main__":
-    pass
+
+    handler = PDFExtractor().extract_games_list()
+    handler.save_games_list()
+
+    new_handler = PDFExtractor.from_json()
+    new_handler.download_pdfs()
